@@ -11,6 +11,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RegistrationService;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
+import ru.kata.spring.boot_security.demo.util.UserValidator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -24,12 +25,15 @@ public class AdminController {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
+    private final UserValidator userValidator;
+
     @Autowired
-    public AdminController(UserService userService, RegistrationService registrationService, RoleService roleService, PasswordEncoder passwordEncoder) {
+    public AdminController(UserService userService, RegistrationService registrationService, RoleService roleService, PasswordEncoder passwordEncoder, UserValidator userValidator) {
         this.userService = userService;
         this.registrationService = registrationService;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
+        this.userValidator = userValidator;
     }
 
     @GetMapping()
@@ -47,7 +51,11 @@ public class AdminController {
     }
 
     @PostMapping("/new")
-    public String newUser(@ModelAttribute("user") User user) {
+    public String newUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult) {
+        userValidator.validate(user, bindingResult);
+        if(bindingResult.hasErrors()){
+            return "new";
+        }
         registrationService.register(user);
         return "redirect: ";
     }
@@ -62,13 +70,16 @@ public class AdminController {
     }
 
     @PostMapping("/edit")
-    public String update(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, @ModelAttribute("roles") Set<Role> roles,
+    public String update(@ModelAttribute("user") @Valid User updatedUser, BindingResult bindingResult, @ModelAttribute("roles") Set<Role> roles,
                          @RequestParam(value = "userId", required = false) Integer userId) {
+        userValidator.validate(updatedUser, bindingResult);
         if(bindingResult.hasErrors()){
             return "edit";
         }
+        User user = userService.findById(userId).get();
+        user.setName(updatedUser.getName());
         user.setRoles(roles);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         userService.update(userId, user);
         return "redirect:/admin";
     }
