@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New user</title>
+</head>
+<body>
+<h2>Add new user</h2>
+<form th:method="POST" th:action="@{/admin/new}" th:object="${user}">
+    <label for="name">Введите имя пользователя:</label>
+    <input type="text" th:field="*{name}" id="name"/>
+    <div style="color: red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</div>
+    <br>
+    <label for="age">Введите возвраст:</label>
+    <input type="text" th:field="*{age}" id="age"/>
+    <div style="color: red;" th:if="${#fields.hasErrors('age')}" th:errors="*{age}">error</div>
+    <br>
+    <label for="password">Введите пароль:</label>
+    <input type="password" th:field="*{password}" id="password"/>
+    <div style="color: red;" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">error</div>
+    <br>
+    <br>
+    <input type="submit" value="Зарегистрироваться">
+</form>
+</body>
+</html>

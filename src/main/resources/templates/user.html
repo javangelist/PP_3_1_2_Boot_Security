@@ -5,7 +5,9 @@
 </head>
 <body>
 <h1>User, welcome spring boot security page!</h1>
-
-
+<br>
+<form th:method="GET" th:action="@{/logout}">
+    <input type="submit" value="Выйти из профиля">
+</form>
 </body>
 </html>
